@@ -1,25 +1,57 @@
-import logo from './logo.svg';
-import './App.css';
+import { useCallback, useState } from 'react';
+import ReactFlow, {
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
+} from 'react-flow-renderer';
 
-function App() {
+import initialNodes from './nodes.js';
+import initialEdges from './edges.js';
+
+import CustomNode from './CustomNode.js';
+import ConnectionNode from './ConnectionNode.js';
+
+const rfStyle = {
+  height:'100vh',
+  width:'100vw'
+};
+
+const nodeTypes = {
+  selectorNode: CustomNode,
+  connectionNode: ConnectionNode,
+};
+
+function Flow() {
+  const [nodes, setNodes] = useState(initialNodes);
+  const [edges, setEdges] = useState(initialEdges);
+
+  const onNodesChange = useCallback(
+    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    [setNodes]
+  );
+  const onEdgesChange = useCallback(
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    [setEdges]
+  );
+  const onConnect = useCallback(
+    (connection) => setEdges((eds) => addEdge(connection, eds)),
+    [setEdges]
+  );
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      nodeTypes={nodeTypes}
+      fitView
+      style={rfStyle}
+      attributionPosition="top-right"
+    >
+    </ReactFlow>
   );
 }
 
-export default App;
+export default Flow;
