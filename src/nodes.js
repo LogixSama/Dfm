@@ -49,88 +49,8 @@ let config = {
             }
           ]
         },
-        // {
-        //   id: 'br3',
-        //   bridgeName: 'bridge',
-        //   type: 'bridge',
-        //   child: [
-        //     {
-        //       id: 'conn111',
-        //       connectionName: 'connection-1',
-        //       type: 'connection'
-        //     },
-        //     {
-        //       id: 'conn222',
-        //       connectionName: 'connection-1',
-        //       type: 'connection'
-        //     },
-        //     {
-        //       id: 'conn333',
-        //       connectionName: 'connection-1',
-        //       type: 'connection'
-        //     }
-        //   ]
-        // }
       ]
     },
-    // {
-    //   id: 'sys2',
-    //   systemName: 'systemd',
-    //   type: 'container',
-    //   child: [
-    //     {
-    //       id: 'br2',
-    //       bridgeName: 'bridge',
-    //       type: 'bridge',
-    //       child: [
-    //         {
-    //           id: 'conn11',
-    //           connectionName: 'connection-1',
-    //           type: 'connection'
-    //         },
-    //         {
-    //           id: 'conn22',
-    //           connectionName: 'connection-1',
-    //           type: 'connection'
-    //         },
-    //         {
-    //           id: 'conn33',
-    //           connectionName: 'connection-1',
-    //           type: 'connection'
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // },
-    // {
-    //   id: 'sys3',
-    //   systemName: 'systemd',
-    //   type: 'container',
-    //   child: [
-    //     {
-    //       id: 'br3',
-    //       bridgeName: 'bridge',
-    //       type: 'bridge',
-    //       child: [
-    //         {
-    //           id: 'conn111',
-    //           connectionName: 'connection-1',
-    //           type: 'connection'
-    //         },
-    //         {
-    //           id: 'conn222',
-    //           connectionName: 'connection-1',
-    //           type: 'connection'
-    //         },
-    //         {
-    //           id: 'conn333',
-    //           connectionName: 'connection-1',
-    //           type: 'connection'
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // }
   ]
 }
 
@@ -146,16 +66,7 @@ const containerConfig =
           connectionName: 'eth0',
           type: 'connection'
         },
-        {
-          id: 'vi2',
-          connectionName: 'eth1',
-          type: 'connection'
-        },
-        {
-          id: 'vi3',
-          connectionName: 'eth2',
-          type: 'connection'
-        }
+
       ]
     },
     {
@@ -195,9 +106,36 @@ const containerConfig =
           connectionName: 'eth1',
           type: 'connection'
         },
+      ]
+    },
+    {
+      id: 'container6',
+      containerName: 'container6',
+      type: 'container',
+      child: [
         {
-          id: 'vi333',
-          connectionName: 'eth2',
+          id: 'vi2222',
+          connectionName: 'eth1',
+          type: 'connection'
+        },
+        {
+          id: 'vi2223',
+          connectionName: 'eth1',
+          type: 'connection'
+        },
+        {
+          id: 'vi2224',
+          connectionName: 'eth1',
+          type: 'connection'
+        },
+        {
+          id: 'vi2225',
+          connectionName: 'eth1',
+          type: 'connection'
+        },
+        {
+          id: 'vi2226',
+          connectionName: 'eth1',
           type: 'connection'
         }
       ]
@@ -208,20 +146,18 @@ const containerConfig =
 
 const nodes = [];
 let bridgeHeight;
-
-
+let lastContainerSize = 0;
 const containerNode = (containerConfig) => {
   for (let [j, container] of containerConfig.entries()) {
-    console.log(container)
+    let lastConnectionSize = 0;
     for (let [i, containerChild] of (container.child).entries()) {
-      console.log('shreyan')
       nodes.push(
         {
           id: containerChild.id,
           type: 'connectionNode',
           name: containerChild.connectionName,
-          position: { x: 350, y: (i + 1) * 65 },
-          data: {
+          position: { x: 400, y: lastConnectionSize + 35 },
+          data: { 
             style: {
               width: 300,
               height: 30,
@@ -232,13 +168,14 @@ const containerNode = (containerConfig) => {
           extent: 'parent',
         }
       )
+      lastConnectionSize += 100 
     }
     nodes.push(
       {
         id: container.id,
         type: 'selectorNode',
         name: container.containerName,
-        position: { x: 0, y: (systemdSize + (j + 1) * (container.child.length * 120)) },
+        position: { x: 0, y: lastContainerSize },
         data: {
           style: {
             width: 800,
@@ -248,21 +185,24 @@ const containerNode = (containerConfig) => {
         }
       }
     )
+    lastContainerSize+= container.child.length * 100 + 20
+    console.log(lastContainerSize,j)
   }
 }
 
-let systemdSize;
+let systemdSize = 400;
 const systemd = (config) => {
   for (let [k, container] of (config.nodes).entries()) {
     for (let [j, bridge] of (container.child).entries()) {
       console.log(bridge)
+      let lastConnectionSize = 0;
       for (let [i, connection] of (bridge.child).entries()) {
         nodes.push(
           {
             id: connection.id,
             type: 'connectionNode',
             name: connection.connectionName,
-            position: { x: 150, y: (i + 1) * 65 },
+            position: { x: 150, y: lastConnectionSize + 30 },
             data: {
               style: {
                 width: 300,
@@ -274,6 +214,7 @@ const systemd = (config) => {
             extent: 'parent'
           }
         )
+        lastConnectionSize += 100 
       }
       bridgeHeight = bridge.child.length * 100
       console.log(bridgeHeight)
@@ -311,7 +252,7 @@ const systemd = (config) => {
         }
       }
     )
-    systemdSize = bridgeHeight * container.child.length * 1.5 + 300
+    systemdSize = bridgeHeight * container.child.length * 1.5
   }
 }
 
