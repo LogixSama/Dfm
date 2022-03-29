@@ -28,25 +28,39 @@ let config = {
           ]
         },
         {
-          id: 'br2',
+          id: 'br3',
           bridgeName: 'bridge',
           type: 'bridge',
           child: [
             {
-              id: 'conn11',
+              id: 'conn111',
               connectionName: 'connection-1',
               type: 'connection'
             },
             {
-              id: 'conn22',
+              id: 'conn222',
               connectionName: 'connection-1',
               type: 'connection'
             },
-            {
-              id: 'conn33',
-              connectionName: 'connection-1',
-              type: 'connection'
-            }
+            // {
+            //   id: 'conn333',
+            //   connectionName: 'connection-1',
+            //   type: 'connection'
+            // },
+            // {
+            //   id: 'conn334',
+            //   connectionName: 'connection-1',
+            //   type: 'connection'
+            // },            {
+            //   id: 'conn335',
+            //   connectionName: 'connection-1',
+            //   type: 'connection'
+            // },            {
+            //   id: 'conn336',
+            //   connectionName: 'connection-1',
+            //   type: 'connection'
+            // },
+
           ]
         },
       ]
@@ -143,11 +157,11 @@ const containerConfig =
 
   ]
 
-
+let systemdSize = 0;
 const nodes = [];
 let bridgeHeight;
 let lastContainerSize = 0;
-const containerNode = (containerConfig) => {
+const containerNode = (containerConfig,systemdSize) => {
   for (let [j, container] of containerConfig.entries()) {
     let lastConnectionSize = 0;
     for (let [i, containerChild] of (container.child).entries()) {
@@ -157,7 +171,7 @@ const containerNode = (containerConfig) => {
           type: 'connectionNode',
           name: containerChild.connectionName,
           position: { x: 400, y: lastConnectionSize + 35 },
-          data: { 
+          data: {
             style: {
               width: 300,
               height: 30,
@@ -168,14 +182,14 @@ const containerNode = (containerConfig) => {
           extent: 'parent',
         }
       )
-      lastConnectionSize += 100 
+      lastConnectionSize += 100
     }
     nodes.push(
       {
         id: container.id,
         type: 'selectorNode',
         name: container.containerName,
-        position: { x: 0, y: lastContainerSize },
+        position: { x: 0, y: systemdSize + lastContainerSize },
         data: {
           style: {
             width: 800,
@@ -185,14 +199,14 @@ const containerNode = (containerConfig) => {
         }
       }
     )
-    lastContainerSize+= container.child.length * 100 + 20
-    console.log(lastContainerSize,j)
+    lastContainerSize += container.child.length * 100 + 20
+    console.log(lastContainerSize, j)
   }
 }
 
-let systemdSize = 400;
 const systemd = (config) => {
   for (let [k, container] of (config.nodes).entries()) {
+    let lastBridgeSize = 0;
     for (let [j, bridge] of (container.child).entries()) {
       console.log(bridge)
       let lastConnectionSize = 0;
@@ -214,16 +228,15 @@ const systemd = (config) => {
             extent: 'parent'
           }
         )
-        lastConnectionSize += 100 
+        lastConnectionSize += 100
       }
       bridgeHeight = bridge.child.length * 100
-      console.log(bridgeHeight)
       nodes.push(
         {
           id: bridge.id,
           type: 'selectorNode',
           name: bridge.bridgeName,
-          position: { x: 100, y: ((j * bridgeHeight) + ((j+1)*100)) },
+          position: { x: 100, y: lastBridgeSize + 50 },
           data: {
             style: {
               width: 600,
@@ -235,29 +248,33 @@ const systemd = (config) => {
           extent: 'parent'
         }
       )
+      lastBridgeSize += bridge.child.length * 100 + 20
     }
-    console.log(bridgeHeight * container.child.length * 1.5)
     nodes.push(
       {
         id: container.id,
         type: 'selectorNode',
         name: container.systemName,
-        position: { x: 0, y: (k + 1) * 600 },
+        position: { x: 0, y: lastBridgeSize + 100 },
         data: {
           style: {
             width: 800,
-            height: bridgeHeight * container.child.length * 1.5,
+            height: lastBridgeSize + 100,
             border: '1px solid red'
           }
         }
       }
     )
-    systemdSize = bridgeHeight * container.child.length * 1.5
+    console.log('here')
+    systemdSize += lastBridgeSize + 100
+    console.log(systemdSize)
   }
 }
 
 systemd(config)
-containerNode(containerConfig)
+console.log(systemdSize)
+systemdSize = systemdSize * 2 + 200
+containerNode(containerConfig,systemdSize)
 
 console.log(nodes)
 
